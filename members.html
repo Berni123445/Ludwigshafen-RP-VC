@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ludwigshafen RP - Members</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body {font-family: Arial; background:#1e1e1e; color:white; text-align:center;}
+nav{background:#111; padding:15px;}
+nav a{color:white; margin:10px; text-decoration:none; font-weight:bold;}
+input, select, button{padding:10px; margin:5px; border-radius:5px; border:none;}
+button{background:#5865F2; color:white; cursor:pointer;}
+button:hover{background:#4752C4;}
+.member{background:#2b2b2b; margin:10px auto; padding:10px; width:300px; border-radius:8px; text-align:left;}
+#membersPage, #adminPanel{display:none;}
+#loginBox{margin-top:50px;}
+#meeting{margin-top:30px; display:none; width:100%; max-width:900px; height:500px;}
+@media (max-width:500px){.member{width:90%;} #meeting{height:300px;}}
+</style>
+</head>
+<body>
+
+<div id="loginBox">
+<h1>Login</h1>
+<input type="text" id="username" placeholder="Benutzername"><br>
+<input type="password" id="password" placeholder="Passwort"><br>
+<button onclick="login()">Login</button>
+</div>
+
+<div id="membersPage">
+<nav>
+<h2>Ludwigshafen RP</h2>
+<ul>
+<li><a href="start.html">Startseite</a></li>
+<li><a href="index.html">Team</a></li>
+<li><a href="members.html">Members</a></li>
+<li><a href="regel.html">Regel</a></li>
+</ul>
+</nav>
+
+<h1>Mitglieder</h1>
+
+<div id="adminPanel">
+<h2>Admin Panel</h2>
+<h3>Neuen Benutzer anlegen</h3>
+<input type="text" id="newName" placeholder="Name">
+<input type="password" id="newPassword" placeholder="Passwort">
+<select id="newRole">
+<option>member</option>
+<option>owner</option>
+<option>co.owner</option>
+<option>pl</option>
+<option>stv.pl</option>
+<option>tl</option>
+<option>stv.tl</option>
+<option>manager</option>
+<option>stv.manager</option>
+<option>dev</option>
+<option>stv.dev</option>
+<option>admin</option>
+<option>mod</option>
+<option>sup</option>
+</select>
+<button onclick="createUser()">Benutzer erstellen</button>
+</div>
+
+<h2>Memberliste</h2>
+<div id="memberList"></div>
+
+<h2>Teammeeting</h2>
+<button onclick="joinMeeting()">Teammeeting betreten</button>
+<div id="meeting"></div>
+
+</div>
+
+<script src='https://meet.jit.si/external_api.js'></script>
+<script>
+// === Admin-Account festlegen ===
+const ADMIN_USERNAME = "Admin";
+const ADMIN_PASSWORD = "IwIs_1520."; 
+let members = JSON.parse(localStorage.getItem("members")) || [];
+let currentUser = null;
+
+// === Login ===
+function login(){
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+
+    // Admin login
+    if(username === ADMIN_USERNAME && password === ADMIN_PASSWORD){
+        currentUser = {name: ADMIN_USERNAME, role:"admin"};
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("membersPage").style.display = "block";
+        document.getElementById("adminPanel").style.display = "block";
+        showMembers();
+        return;
+    }
+
+    // Normale Benutzer
+    let user = members.find(m => m.name === username && m.password === password);
+    if(user){
+        currentUser = user;
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("membersPage").style.display = "block";
+        showMembers();
+    } else {
+        alert("Falscher Benutzername oder Passwort!");
+    }
+}
+
+// === LocalStorage speichern ===
+function saveMembers(){ localStorage.setItem("members", JSON.stringify(members)); }
+
+// === Memberliste anzeigen ===
+function showMembers(){
+    const list = document.getElementById("memberList");
+    list.innerHTML = "";
+    members.forEach((member, index)=>{
+        let div = document.createElement("div");
+        div.className = "member";
+        let editBtn = "", deleteBtn="";
+        if(currentUser && currentUser.name===ADMIN_USERNAME){
+            editBtn = `<button onclick="editMember(${index})">Bearbeiten</button>`;
+            deleteBtn = `<button onclick="deleteMember(${index})">Löschen</button>`;
+        }
+        div.innerHTML = `<b>${member.name}</b> - Rolle: ${member.role} ${editBtn} ${deleteBtn}`;
+        list.appendChild(div);
+    });
+}
+
+// === Admin-Funktionen ===
+function createUser(){
+    if(!currentUser || currentUser.name!==ADMIN_USERNAME){ alert("Nur Admin kann neue Benutzer erstellen!"); return; }
+    const name = document.getElementById("newName").value.trim();
+    const password = document.getElementById("newPassword").value.trim();
+    const role = document.getElementById("newRole").value;
+    if(!name || !password){ alert("Name und Passwort angeben!"); return; }
+    members.push({name,password,role});
+    saveMembers();
+    showMembers();
+    document.getElementById("newName").value="";
+    document.getElementById("newPassword").value="";
+}
+
+// === Benutzer bearbeiten ===
+function editMember(i){
+    if(!currentUser || currentUser.name!==ADMIN_USERNAME){ alert("Nur Admin darf bearbeiten!"); return; }
+    let newName = prompt("Neuer Name:", members[i].name);
+    let newRole = prompt("Neue Rolle:", members[i].role);
+    let newPassword = prompt("Neues Passwort:", members[i].password);
+    if(newName) members[i].name = newName;
+    if(newRole) members[i].role = newRole;
+    if(newPassword) members[i].password = newPassword;
+    saveMembers();
+    showMembers();
+}
+
+// === Benutzer löschen ===
+function deleteMember(i){
+    if(!currentUser || currentUser.name!==ADMIN_USERNAME){ alert("Nur Admin darf löschen!"); return; }
+    if(confirm("Willst du diesen Benutzer wirklich löschen?")){
+        members.splice(i,1);
+        saveMembers();
+        showMembers();
+    }
+}
+
+</script>
+
+<script>
+function joinMeeting() {
+    // Benutzername abfragen
+    const username = prompt("Gib deinen Benutzernamen ein:");
+
+    // Suche das Mitglied in der Liste (case-insensitive)
+    const user = members.find(m => m.name.toLowerCase() === username.toLowerCase());
+
+    if (!user) {
+        alert("Du bist nicht in der Memberliste!");
+        return;
+    }
+
+    // Teammeeting-Zugriff prüfen
+    // Admins dürfen immer rein, andere Rollen außer 'member' ebenfalls
+    if (user.role.toLowerCase() === "member" && user.role.toLowerCase() !== "admin") {
+        alert("Members dürfen nicht ins Teammeeting!");
+        return;
+    }
+
+    // Meeting anzeigen
+    const meetingDiv = document.getElementById("meeting");
+    meetingDiv.style.display = "block";
+    meetingDiv.scrollIntoView({ behavior: "smooth" });
+}
+</script>
+
+<script>
+// === Teammeeting mit Jitsi ===
+let api = null;
+
+function joinMeeting(){
+
+    if(!currentUser){
+        alert("Bitte zuerst einloggen!");
+        return;
+    }
+
+    // Member dürfen nicht ins Meeting
+    if(currentUser.role.toLowerCase() === "member"){
+        alert("Members dürfen nicht ins Teammeeting!");
+        return;
+    }
+
+    // Wenn Meeting schon offen ist
+    if(api) return;
+
+    const meetingDiv = document.getElementById("meeting");
+    meetingDiv.style.display = "block";
+    meetingDiv.innerHTML = "";
+
+    const domain = "meet.jit.si";
+
+    const options = {
+        roomName: "LudwigshafenRPTeammeeting",
+        parentNode: meetingDiv,
+        width: "100%",
+        height: 500,
+        userInfo: {
+            displayName: currentUser.name
+        },
+        configOverwrite: {
+            prejoinPageEnabled: false
+        }
+    };
+
+    api = new JitsiMeetExternalAPI(domain, options);
+}
+</script>
+
+<script src="https://meet.jit.si/external_api.js"></script>
+
+<script src="https://meet.jit.si/external_api.js"></script>
+
+<script>
+HIER DER CODE
+</script>
+
+<div id="meeting"></div>
+
+<h2>Teamchat</h2>
+
+<div id="chatBox"></div>
+
+<input type="text" id="chatInput" placeholder="Nachricht schreiben...">
+<button onclick="sendMessage()">Senden</button>
+
+<style>
+#chatBox{
+width:100%;
+max-width:900px;
+height:250px;
+background:#2b2b2b;
+border-radius:8px;
+margin:10px auto;
+padding:10px;
+overflow-y:auto;
+text-align:left;
+}
+
+.message{
+margin-bottom:5px;
+}
+
+.username{
+font-weight:bold;
+}
+</style>
+
+<script>
+
+let messages = [];
+
+function sendMessage(){
+
+    if(!currentUser){
+        alert("Du musst eingeloggt sein!");
+        return;
+    }
+
+    const input = document.getElementById("chatInput");
+    const text = input.value.trim();
+
+    if(text === "") return;
+
+    const message = {
+        user: currentUser.name,
+        role: currentUser.role,
+        text: text
+    };
+
+    messages.push(message);
+    input.value = "";
+
+    updateChat();
+}
+
+function updateChat(){
+
+    const chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML = "";
+
+    messages.forEach(msg => {
+
+        const div = document.createElement("div");
+        div.className = "message";
+
+        let color = "white";
+
+        if(msg.role.toLowerCase() === "admin"){
+            color = "red";
+        }
+
+        div.innerHTML =
+        "<span class='username' style='color:"+color+"'>" +
+        msg.user +
+        ":</span> " +
+        msg.text;
+
+        chatBox.appendChild(div);
+
+    });
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>

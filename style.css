@@ -1,0 +1,176 @@
+/* ============================
+   Ludwigshafen RP - Einfaches Design
+============================ */
+
+body {
+    font-family: Arial, sans-serif;
+    background: #1e1e1e;
+    color: white;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+/* ===== Navigation ===== */
+nav {
+    background: #111;
+    padding: 15px;
+}
+
+nav h2 {
+    margin: 0 0 10px 0;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+nav ul li {
+    margin: 0 10px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+/* ===== Header/Hero ===== */
+.hero {
+    padding: 50px 20px;
+}
+
+.hero h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.discord-button {
+    display: inline-block;
+    background: #5865F2;
+    color: white;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.discord-button:hover {
+    background: #4752C4;
+}
+
+/* ===== Sections ===== */
+section, .container {
+    padding: 20px 10px;
+}
+
+/* ===== Team / Members ===== */
+.team-section {
+    margin-bottom: 30px;
+}
+
+.team-section h2 {
+    margin-bottom: 10px;
+}
+
+.member, .empty {
+    background: #2b2b2b;
+    margin: 10px auto;
+    padding: 10px;
+    width: 300px;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.member span {
+    display: block;
+}
+
+.member.me {
+    color: red;
+    font-weight: bold;
+}
+
+/* ===== Inputs / Buttons ===== */
+input, select, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    border: none;
+    width: 250px;
+}
+
+button {
+    background: #5865F2;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #4752C4;
+}
+
+/* ===== Members Page Iframe / Meeting ===== */
+#meeting {
+    margin-top: 30px;
+    display: none;
+}
+
+iframe {
+    width: 800px;
+    height: 500px;
+    border: none;
+    border-radius: 10px;
+}
+
+/* ===== Footer ===== */
+footer {
+    background: #111;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* ===== Mobile Anpassung ===== */
+@media (max-width: 500px) {
+    .hero h1 {
+        font-size: 1.8em;
+    }
+    .hero p {
+        font-size: 1em;
+    }
+    .member, .empty {
+        width: 90%;
+    }
+    iframe {
+        width: 100%;
+        height: 300px;
+    }
+    input, select, button {
+        width: 90%;
+    }
+}
+
